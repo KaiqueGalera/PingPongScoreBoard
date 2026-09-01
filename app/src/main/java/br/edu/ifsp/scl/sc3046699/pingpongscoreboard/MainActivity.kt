@@ -45,19 +45,15 @@ class MainActivity : ComponentActivity() {
 }
 
 class ScoreboardViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() {
-    val scoreA: StateFlow<Int> = savedStateHandle.getStateFlow(KEY_SCORE_A, 0)
-    val scoreB: StateFlow<Int> = savedStateHandle.getStateFlow(KEY_SCORE_B, 0)
-
-    fun incrementA() { savedStateHandle[KEY_SCORE_A] = scoreA.value + 1 }
-    fun incrementB() { savedStateHandle[KEY_SCORE_B] = scoreB.value + 1 }
+    val _scoreA = MutableStateFlow(0)
+    val scoreA: StateFlow<Int> = _scoreA.asStateFlow()
+    val _scoreB = MutableStateFlow(0)
+    val scoreB: StateFlow<Int> = _scoreB.asStateFlow()
+    fun incrementA() { _scoreA.update { it + 1 } }
+    fun incrementB() { _scoreB.update { it + 1 } }
     fun reset() {
-        savedStateHandle[KEY_SCORE_A] = 0
-        savedStateHandle[KEY_SCORE_B] = 0
-    }
-
-    private companion object {
-        const val KEY_SCORE_A = "scoreA"
-        const val KEY_SCORE_B = "scoreB"
+        _scoreA.value = 0
+        _scoreB.value = 0
     }
 }
 

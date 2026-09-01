@@ -21,9 +21,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.edu.ifsp.scl.sc3046699.pingpongscoreboard.ui.theme.PingPongScoreBoardTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,14 +44,20 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-class ScoreboardViewModel : ViewModel() {
-    var scoreA by mutableStateOf(0)
-    var scoreB by mutableStateOf(0)
-    fun incrementA() { scoreA++ }
-    fun incrementB() { scoreB++ }
+class ScoreboardViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() {
+    val scoreA: StateFlow<Int> = savedStateHandle.getStateFlow(KEY_SCORE_A, 0)
+    val scoreB: StateFlow<Int> = savedStateHandle.getStateFlow(KEY_SCORE_B, 0)
+
+    fun incrementA() { savedStateHandle[KEY_SCORE_A] = scoreA.value + 1 }
+    fun incrementB() { savedStateHandle[KEY_SCORE_B] = scoreB.value + 1 }
     fun reset() {
-        scoreA = 0
-        scoreB = 0
+        savedStateHandle[KEY_SCORE_A] = 0
+        savedStateHandle[KEY_SCORE_B] = 0
+    }
+
+    private companion object {
+        const val KEY_SCORE_A = "scoreA"
+        const val KEY_SCORE_B = "scoreB"
     }
 }
 
@@ -53,9 +66,12 @@ fun PingPongScreen(
     modifier: Modifier = Modifier,
     viewModel: ScoreboardViewModel = viewModel()
 ) {
+    val scoreA by viewModel.scoreA.collectAsStateWithLifecycle()
+    val scoreB by viewModel.scoreB.collectAsStateWithLifecycle()
+
     PingPongScoreBoard(
-        scoreA = viewModel.scoreA,
-        scoreB = viewModel.scoreB,
+        scoreA = scoreA,
+        scoreB = scoreB,
         onIncrementA = viewModel::incrementA,
         onIncrementB = viewModel::incrementB,
         onReset = viewModel::reset,

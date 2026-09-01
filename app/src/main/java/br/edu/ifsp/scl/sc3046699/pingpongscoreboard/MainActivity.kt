@@ -68,7 +68,7 @@ fun PlayerHud(name: String, score:Int, onIncrement: ()-> Unit){
         Text(text = name, fontSize = 30.sp)
         Text(text = "$score", fontSize = 40.sp)
         Button(onClick = onIncrement) {
-            Text("+1")
+            Text("+1", fontSize = 20.sp)
         }
     }
 
